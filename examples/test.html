@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MusicPlayer</title>
+
+  <!-- Inject some babel helpers for code running. it is not needed in a real babel project when you configure babel or there is no new feature of js -->
+  <!-- 为代码运行注入一些babel帮助函数。在真正的babel项目中，当已配置 babel 时，或者js没有新特性时，并不需要它 -->
+  <script src="https://cdn.jsdelivr.net/npm/@babel/polyfill/dist/polyfill.min.js"></script>
+
+  <script src="../lib/umd/index.js"></script>
+
+  <style>
+  @keyframes my-rotate {
+    0% {
+      transform: rotate(-180deg);
+    }
+
+    100% {
+      transform: rotate(180deg);
+    }
+  }
+
+  .flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  body {
+    margin: 0;
+    height: 100vh;
+    background: url('./imgs/bg.jpg') no-repeat center center / 100% 100%;
+  }
+
+  #lyrics {
+    justify-content: flex-end;
+    height: calc(100vh - 100px);
+  }
+
+  #lyrics svg {
+    height: 50vh;
+  }
+
+  .path {
+    box-shadow: 0 0 10px rgba(0, 0, 0, .5);
+  }
+
+  .avatar-wrapper {
+    width: 220px;
+    padding: 10px;
+    margin: 0 10vw;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, .5);
+  }
+
+  .avatar-wrapper #l-avatar {
+    width: 100%;
+  }
+
+  .avatar-wrapper #name {
+    margin: 5px 0 0;
+    line-height: normal;
+    font-size: 16px;
+    font-weight: 300;
+    color: #fff;
+    opacity: 0.7;
+  }
+
+  .right-wrapper {
+    justify-content: flex-end;
+    position: relative;
+    width: 70vw;
+    height: 100%;
+    background: rgba(17, 22, 62, 0.39);
+  }
+
+  .animation-wrapper {
+    flex: 1;
+  }
+
+  #file-list-wrapper {
+    flex: none;
+    position: absolute;
+    top: 0;
+    left: 100%;
+    width: 240px;
+    height: 100%;
+    background: rgba(0, 0, 0, .5);
+    transition: 0.3s ease-in;
+    overflow: hidden;
+  }
+
+  #file-list-wrapper .h4 {
+    justify-content: space-between;
+    margin: 0;
+    padding: 0 15px;
+    line-height: 40px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #8898c1;
+    border-bottom: 1px solid rgba(136, 152, 193, 0.38);
+  }
+
+  #file-list-wrapper.show {
+    left: calc(100% - 240px);
+  }
+
+  #file-list {
+    max-height: calc(100% - 41px);
+    padding: 10px 0;
+    overflow: auto;
+  }
+
+  .empty-list {
+    margin: 40px 0 0;
+    font-size: 12px;
+    color: rgba(229, 248, 255, 0.78);
+    text-align: center;
+  }
+
+  .file-item {
+    justify-content: space-between;
+    padding: 5px 15px;
+    line-height: 16px;
+    opacity: 0.7;
+    cursor: pointer;
+  }
+
+  .file-item:hover {
+    opacity: 1;
+  }
+
+  .file-item:hover img {
+    display: block;
+  }
+
+  .file-item .title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #fff;
+  }
+
+  .file-item img {
+    display: none;
+    width: 1em;
+    cursor: pointer;
+  }
+
+  .rotate {
+    animation: my-rotate linear 2s infinite;
+    transform-origin: 49.1% 51.5%;
+  }
+
+  #controller {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    padding: 0 150px 0 100px;
+    background: rgba(0, 0, 0, .5);
+  }
+
+  #controller:hover #entire {
+    display: block;
+  }
+
+  #avatar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100px;
+    height: 100px;
+    background: #fff;
+  }
+
+  .btn-group {
+
+  }
+
+  .btn img {
+    width: 20px;
+  }
+
+  .btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  #btn-pause-play {
+    margin: 0 30px;
+  }
+
+  #btn-pause-play #btn-pause {
+    display: none;
+  }
+
+  .playing #btn-play {
+    display: none;
+  }
+
+  .playing #btn-pause {
+    display: flex !important;
+  }
+
+  #btn-menu {
+    position: absolute;
+    right: 30px;
+    background: none;
+  }
+
+  .btn-add {
+    width: 40px;
+    height: 40px;
+    margin: 0 -10px 0 0;
+    background: none !important;
+  }
+
+  #entire-bar {
+    display: block;
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    height: 3px;
+    font-size: 12px;
+    color: #333;
+    background: rgb(44, 57, 84);
+  }
+
+  #process-bar {
+    position: absolute;
+    left: 0;
+    bottom: 50%;
+    height: 3px;
+    background: linear-gradient(to right, #ffd294, #5bffa4);
+  }
+
+  #times {
+    position: absolute;
+    bottom: 50%;
+    padding: 2px 10px;
+    line-height: 16px;
+    border-radius: 10px;
+    background: linear-gradient(to bottom, #a4b7d3, #788fcc);
+    transform: translate(0, 50%);
+    user-select: none;
+  }
+  </style>
+</head>
+<body>
+<div id="lyrics" class="flex-center">
+  <div class="avatar-wrapper">
+    <img id="l-avatar" src="./imgs/avatars/sample.jpeg" alt="l-avatar">
+    <h2 id="name">~音乐~</h2>
+  </div>
+  <div class="right-wrapper flex-center">
+    <!--播放动画-->
+    <div class="animation-wrapper flex-center">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+        <g id="animation">
+          <path
+            class="path"
+            d="M503.35668148 342.69866667c-101.5808 0-184.22897778 82.64817778-184.22897778 184.22897778S401.77588148 711.03525925 503.35668148 711.03525925 687.4642963 628.50844445 687.4642963 526.92764445s-82.64817778-184.22897778-184.10761482-184.22897778z m0 334.47632592c-82.8909037 0-150.24734815-67.35644445-150.24734815-150.24734814s67.47780741-150.24734815 150.24734815-150.24734815c82.8909037 0 150.24734815 67.47780741 150.24734815 150.24734815 0 82.8909037-67.47780741 150.24734815-150.24734815 150.24734814z"
+            fill="#fff"></path>
+          <path
+            class="path"
+            d="M430.30335154 538.76823018a74.03140741 74.03140741 0 1 0 146.15279965-23.70562004 74.03140741 74.03140741 0 1 0-146.15279965 23.70562004Z"
+            fill="#fff"></path>
+          <path
+            class="path"
+            d="M479.32681481 216.23845925c0-9.34494815-7.64586667-16.99081482-16.99081481-16.9908148-77.42957037 0-150.24734815 30.21937778-205.10340742 84.95407407s-84.95407408 127.55247408-84.95407407 205.1034074c0 9.34494815 7.64586667 16.99081482 16.99081482 16.99081483s16.99081482-7.64586667 16.99081482-16.99081483c0-141.26648889 114.93072592-256.07585185 256.07585185-256.07585184 9.34494815 0 16.99081482-7.64586667 16.99081481-16.99081483z"
+            fill="rgba(255, 255, 255, 0.7)"></path>
+        </g>
+        <path
+          class="path"
+          d="M1010.5325037 134.07573333c0-32.52527408-26.33576297-58.86103703-58.86103704-58.86103703s-58.86103703 26.33576297-58.86103703 58.86103703c0 21.84533333 11.89357037 40.77795555 29.4912 50.97244445L904.704 258.83685925c-17.47626667-26.2144-37.62251852-50.60835555-60.19602964-73.18186666-44.29748148-44.29748148-95.87674075-79.12865185-153.40278518-103.40124444-59.46785185-25.12213333-122.69795555-37.98660741-187.86986667-37.9866074s-128.40201482 12.74311111-187.86986666 37.9866074c-57.52604445 24.27259259-109.1053037 59.10376297-153.40278519 103.40124444s-79.12865185 95.87674075-103.40124444 153.40278519c-25.12213333 59.46785185-37.98660741 122.69795555-37.98660741 187.86986667s12.74311111 128.40201482 37.98660741 187.86986666c24.27259259 57.52604445 59.10376297 109.1053037 103.40124444 153.40278519s95.87674075 79.12865185 153.40278519 103.40124445c59.46785185 25.12213333 122.69795555 37.98660741 187.86986666 37.9866074S631.63733333 996.84503703 691.10518518 971.60154075c57.52604445-24.27259259 109.1053037-59.10376297 153.40278518-103.40124445s79.12865185-95.87674075 103.40124445-153.40278519c25.12213333-59.46785185 37.98660741-122.69795555 37.98660741-187.86986666s-12.74311111-128.40201482-37.98660741-187.86986667c-5.5826963-13.1072-11.65084445-25.85031111-18.3258074-38.3506963l25.48622222-107.77031111c30.94755555-1.82044445 55.46287408-27.42802963 55.46287407-58.86103704zM952.03555555 526.92764445c0 60.56011852-11.89357037 119.29979259-35.31662222 174.6413037-22.57351111 53.3997037-54.97742222 101.45943703-96.11946667 142.60148148-41.26340741 41.26340741-89.20177778 73.54595555-142.60148148 96.11946667-55.34151111 23.42305185-114.08118518 35.31662222-174.6413037 35.31662222s-119.29979259-11.89357037-174.6413037-35.31662222c-53.3997037-22.57351111-101.45943703-54.97742222-142.60148148-96.11946667-41.26340741-41.26340741-73.54595555-89.20177778-96.11946667-142.60148148-23.42305185-55.34151111-35.31662222-114.08118518-35.31662222-174.6413037s11.89357037-119.29979259 35.31662222-174.6413037c22.57351111-53.3997037 54.97742222-101.45943703 96.11946667-142.6014815s89.20177778-73.54595555 142.60148148-96.11946666c55.34151111-23.42305185 114.08118518-35.31662222 174.6413037-35.31662222s119.29979259 11.89357037 174.6413037 35.31662222c53.3997037 22.57351111 101.45943703 54.97742222 142.60148148 96.11946666 28.76302222 28.76302222 53.27834075 60.92420741 73.18186667 95.87674075L857.97925925 457.38666667c0 0.24272592-0.12136297 0.36408889-0.12136295 0.60681481-12.37902222 61.40965925-40.53522963 118.81434075-81.67727408 166.1458963L685.88657778 728.02607408c-6.18951111 7.03905185-5.33997037 17.84035555 1.69908147 23.9085037 3.15543703 2.79134815 7.16041482 4.12634075 11.1653926 4.12634074 4.73315555 0 9.46631111-1.94180741 12.86447407-5.82542222l90.29404444-104.00805927c44.78293333-51.70062222 75.73048889-114.32391111 89.20177779-181.43762962l26.33576296-111.4112c22.9376 54.97742222 34.58844445 113.35300741 34.58844444 173.54903704z"
+          fill="#fff"></path>
+      </svg>
+    </div>
+    <div id="file-list-wrapper">
+      <h4 class="h4 flex-center">
+        播放列表
+        <label class="btn btn-add flex-center">
+          <img src="./imgs/add.svg" alt="btn-add">
+          <input id="add-file" type="file" hidden accept="audio/mpeg" />
+        </label>
+      </h4>
+      <div id="file-list">
+        <div class="empty-list">~ 播放列表空空如也 ~</div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--控制器-->
+<div id="controller" class="flex-center">
+  <div class="avatar">
+    <img id="avatar" src="./imgs/avatars/sample.jpeg" alt="avatar">
+  </div>
+  <div id="entire-bar">
+    <div id="process-bar">
+      <div id="times">00:00:00/00:00:00</div>
+    </div>
+  </div>
+  <div class="btn-group flex-center">
+    <div id="btn-pre" class="btn flex-center">
+      <img src="./imgs/prev.svg" alt="btn-pre">
+    </div>
+    <div id="btn-pause-play">
+      <div id="btn-play" class="btn flex-center">
+        <img src="./imgs/play.svg" alt="btn-pause-play">
+      </div>
+      <div id="btn-pause" class="btn flex-center">
+        <img src="./imgs/pause.svg" alt="btn-pause-play">
+      </div>
+    </div>
+    <div id="btn-next" class="btn flex-center">
+      <img src="./imgs/next.svg" alt="btn-next">
+    </div>
+    <div id="btn-menu" class="btn flex-center">
+      <img src="./imgs/menu.svg" alt="btn-menu">
+    </div>
+  </div>
+  <audio id="audio"></audio>
+</div>
+
+<script>
+const player = new MusicPlayer()
+// do something ...
+</script>
+</body>
+</html>
