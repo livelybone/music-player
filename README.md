@@ -3,7 +3,9 @@
 A description for the module
 
 ## 运行
-你可以通过运行项目的 example 来了解这个项目的使用，以下是启动步骤：
+运行项目前，你需要安装 node
+
+然后你可以通过运行项目的 example 来了解这个项目的使用，以下是启动步骤：
 
 1. 克隆项目到本地 `git clone git@github.com:livelybone/music-player.git`
 2. 进入本地克隆目录 `cd music-player`
