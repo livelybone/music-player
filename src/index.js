@@ -123,6 +123,7 @@ export default class MusicPlayer {
   listenAddAudio() {
     this.addFileEl.addEventListener('change', e => {
       this.addAudio(e.target.files[0])
+      e.target.value = ''
     })
   }
 
@@ -162,7 +163,7 @@ export default class MusicPlayer {
         blobToBase64(file).then(url => {
           const $file = { name, avatar: getAvatar(), url }
           this.filesChange([...this.files, $file])
-          this.currFileChange($file)
+          if (!this.audioEl.played) this.currFileChange($file)
         })
       }
     }
