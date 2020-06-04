@@ -7,7 +7,7 @@ A description for the module
 
 然后你可以通过运行项目的 example 来了解这个项目的使用，以下是启动步骤：
 
-1. 克隆项目到本地 `git clone git@github.com:livelybone/music-player.git`
+1. 克隆项目到本地 `git clone http://github.com/livelybone/music-player.git`
 2. 进入本地克隆目录 `cd music-player`
 3. 安装项目依赖 `npm i`(使用 taobao 源: `npm i --registry=http://registry.npm.taobao.org`)
 4. 启动服务 `npm run dev`
